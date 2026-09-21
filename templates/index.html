@@ -1,0 +1,428 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+
+```
+<title>Smart Emergency Traffic Control</title>
+
+<link rel="stylesheet"
+      href="{{ url_for('static', filename='css/style.css') }}">
+```
+
+</head>
+
+<body>
+
+<header>
+    <div>
+        <h1>🚨 Smart Traffic Control</h1>
+        <p>AI-Based Emergency Traffic Management System</p>
+    </div>
+
+```
+<div class="system-status">
+    <span class="status-dot"></span>
+    SYSTEM ONLINE
+</div>
+```
+
+</header>
+
+<main>
+
+```
+<!-- ========================= -->
+<!-- EMERGENCY STATUS -->
+<!-- ========================= -->
+
+<section class="emergency-banner">
+
+    <div>
+        <h2>🚑 Emergency Vehicle Status</h2>
+
+        <p id="emergencyStatus">
+            No emergency vehicle detected
+        </p>
+    </div>
+
+    <div class="priority" id="priority">
+        NORMAL
+    </div>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- EMERGENCY STATISTICS -->
+<!-- ========================= -->
+
+<section class="cards">
+
+    <div class="card">
+        <h3>🚑 Vehicle</h3>
+        <p id="vehicle">None</p>
+    </div>
+
+    <div class="card">
+        <h3>🎯 AI Confidence</h3>
+        <p id="confidence">0%</p>
+    </div>
+
+    <div class="card">
+        <h3>📍 Distance</h3>
+        <p id="distance">-- km</p>
+    </div>
+
+    <div class="card">
+        <h3>⏱️ ETA</h3>
+        <p id="eta">-- min</p>
+    </div>
+
+    <div class="card">
+        <h3>📍 Current Zone</h3>
+        <p id="currentZone">--</p>
+    </div>
+
+    <div class="card">
+        <h3>➡️ Movement</h3>
+        <p id="movement">--</p>
+    </div>
+
+    <div class="card">
+        <h3>🎯 Tracking</h3>
+        <p id="tracking">--</p>
+    </div>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- EMERGENCY EVENT HISTORY -->
+<!-- ========================= -->
+
+<section class="panel">
+
+    <h2>📋 Emergency Event History</h2>
+
+    <div id="emergencyHistory" class="emergency-history">
+
+        <p class="history-empty">
+            No emergency events recorded yet.
+        </p>
+
+    </div>
+
+</section>
+<!-- ========================= -->
+<!-- LIVE TRAFFIC STATISTICS -->
+<!-- ========================= -->
+
+<section class="panel">
+
+    <h2>🚦 Live Traffic Statistics</h2>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>🚗 Total Vehicles</h3>
+            <p id="vehicleCount">0</p>
+        </div>
+
+        <div class="card">
+            <h3>🚘 Cars</h3>
+            <p id="carCount">0</p>
+        </div>
+
+        <div class="card">
+            <h3>🏍️ Motorcycles</h3>
+            <p id="motorcycleCount">0</p>
+        </div>
+
+        <div class="card">
+            <h3>🚌 Buses</h3>
+            <p id="busCount">0</p>
+        </div>
+
+        <div class="card">
+            <h3>🚚 Trucks</h3>
+            <p id="truckCount">0</p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- MAIN DASHBOARD -->
+<!-- ========================= -->
+
+<section class="dashboard">
+
+
+    <!-- TRAFFIC SIGNALS -->
+
+    <div class="panel">
+
+        <h2>🚦 Traffic Signals</h2>
+
+        <div class="signal">
+
+            <div>
+                <h3>Junction 1</h3>
+                <p>Emergency Route</p>
+            </div>
+
+            <span class="signal-light green"
+                  id="signal1">
+                GREEN
+            </span>
+
+        </div>
+
+
+        <div class="signal">
+
+            <div>
+                <h3>Junction 2</h3>
+                <p>Emergency Route</p>
+            </div>
+
+            <span class="signal-light green"
+                  id="signal2">
+                GREEN
+            </span>
+
+        </div>
+
+
+        <div class="signal">
+
+            <div>
+                <h3>Junction 3</h3>
+                <p>Preparing</p>
+            </div>
+
+            <span class="signal-light yellow"
+                  id="signal3">
+                YELLOW
+            </span>
+
+        </div>
+
+
+        <div class="signal">
+
+            <div>
+                <h3>Junction 4</h3>
+                <p>Normal Traffic</p>
+            </div>
+
+            <span class="signal-light red"
+                  id="signal4">
+                RED
+            </span>
+
+        </div>
+
+    </div>
+
+
+    <!-- AI PREDICTION -->
+
+    <div class="panel">
+
+        <h2>🤖 AI Traffic Prediction</h2>
+
+        <div class="prediction">
+
+            <div>
+                <span>Traffic Density</span>
+
+                <strong id="trafficDensity">
+                    MEDIUM
+                </strong>
+            </div>
+
+
+            <div>
+                <span>Priority Score</span>
+
+                <strong id="priorityScore">
+                    0
+                </strong>
+            </div>
+
+
+            <div>
+                <span>Best Route</span>
+
+                <strong id="route">
+                    Not Available
+                </strong>
+            </div>
+
+
+            <div>
+                <span>Congestion Risk</span>
+
+                <strong id="risk">
+                    LOW
+                </strong>
+            </div>
+
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- JUNCTION TRAFFIC -->
+<!-- ========================= -->
+
+<section class="panel">
+
+    <h2>📊 Junction Traffic Conditions</h2>
+
+    <div class="cards">
+
+        <div class="card">
+            <h3>Junction 1</h3>
+            <p>Vehicles: <strong id="junction1Vehicles">0</strong></p>
+            <p>Density: <strong id="junction1Density">LOW</strong></p>
+            <p>Congestion: <strong id="junction1Congestion">0%</strong></p>
+        </div>
+
+
+        <div class="card">
+            <h3>Junction 2</h3>
+            <p>Vehicles: <strong id="junction2Vehicles">0</strong></p>
+            <p>Density: <strong id="junction2Density">LOW</strong></p>
+            <p>Congestion: <strong id="junction2Congestion">0%</strong></p>
+        </div>
+
+
+        <div class="card">
+            <h3>Junction 3</h3>
+            <p>Vehicles: <strong id="junction3Vehicles">0</strong></p>
+            <p>Density: <strong id="junction3Density">LOW</strong></p>
+            <p>Congestion: <strong id="junction3Congestion">0%</strong></p>
+        </div>
+
+
+        <div class="card">
+            <h3>Junction 4</h3>
+            <p>Vehicles: <strong id="junction4Vehicles">0</strong></p>
+            <p>Density: <strong id="junction4Density">LOW</strong></p>
+            <p>Congestion: <strong id="junction4Congestion">0%</strong></p>
+        </div>
+
+    </div>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- LIVE AI VIDEO -->
+<!-- ========================= -->
+
+<section class="panel video-panel">
+
+    <h2>📹 AI Emergency Vehicle Detection</h2>
+
+    <div class="video-container">
+
+        <img
+            src="{{ url_for('video_feed') }}"
+            id="liveVideo"
+            alt="AI Emergency Vehicle Detection"
+        >
+
+    </div>
+
+    <p class="video-status">
+        🔴 LIVE AI CAMERA FEED
+    </p>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- EMERGENCY ROUTE -->
+<!-- ========================= -->
+<section class="panel timing-panel">
+
+    <h2>⏱️ AI Signal Timing</h2>
+
+    <div class="next-junction">
+        <span>Current Junction</span>
+        <strong id="timingJunction">--</strong>
+    </div>
+
+    <div class="timing-grid">
+
+        <div class="timing-card">
+            <span>🟢 Green Time</span>
+            <strong id="greenTime" class="timing-green">--</strong>
+        </div>
+
+        <div class="timing-card">
+            <span>🟡 Yellow Time</span>
+            <strong id="yellowTime" class="timing-yellow">--</strong>
+        </div>
+
+        <div class="timing-card">
+            <span>🔴 Red Time</span>
+            <strong id="redTime" class="timing-red">--</strong>
+        </div>
+
+    </div>
+
+    <div class="next-junction">
+        <span>Next Junction</span>
+        <strong id="nextJunction">--</strong>
+    </div>
+
+</section>
+
+
+<!-- ========================= -->
+<!-- SYSTEM ALERT -->
+<!-- ========================= -->
+
+<section class="alert-box" id="alertBox">
+
+    <strong>🔔 System Alert</strong>
+
+    <p id="alertMessage">
+        System is monitoring traffic conditions.
+    </p>
+
+</section>
+```
+
+</main>
+
+<footer>
+
+```
+<p>
+    AI-Based Predictive Emergency Traffic Management System
+</p>
+
+<p>
+    © 2026 Smart Traffic Control
+</p>
+```
+
+</footer>
+
+<script src="{{ url_for('static', filename='js/script.js') }}"></script>
+
+</body>
+</html>
