@@ -241,6 +241,16 @@ function displayEmergencyData(data) {
     setText("eta", data.eta);
     setText("priority", data.priority);
 
+    setText(
+    "aiDecision",
+    data.ai_decision || "AI decision unavailable"
+);
+
+setText(
+    "aiExplanation",
+    data.ai_explanation || "No AI explanation available."
+);
+
     const priorityElement = document.getElementById("priority");
 
 if (priorityElement) {
