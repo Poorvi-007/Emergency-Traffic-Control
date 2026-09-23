@@ -621,3 +621,74 @@ footer {
         margin: 15px auto;
     }
 }
+/* =====================================================
+   EMERGENCY GREEN CORRIDOR ROUTE
+===================================================== */
+
+.route-panel {
+    margin-top: 20px;
+}
+
+.route-container {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0;
+    padding: 25px 10px;
+    overflow-x: auto;
+}
+
+.route-junction {
+    min-width: 70px;
+    height: 70px;
+    border-radius: 50%;
+    border: 3px solid #cbd5e1;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+    box-shadow: 0 4px 10px rgba(0, 0, 0, 0.08);
+}
+
+.junction-name {
+    font-size: 14px;
+    font-weight: 800;
+    color: #334155;
+}
+
+.route-signal {
+    font-size: 20px;
+    line-height: 1;
+    margin-top: 3px;
+}
+
+.route-line {
+    height: 5px;
+    width: 55px;
+    background: #cbd5e1;
+    flex-shrink: 0;
+}
+
+.route-info {
+    margin-top: 10px;
+    padding: 14px 18px;
+    border-radius: 12px;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 15px;
+}
+
+.route-info span {
+    color: #64748b;
+    font-size: 14px;
+}
+
+.route-info strong {
+    color: #166534;
+    font-size: 16px;
+}
