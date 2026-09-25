@@ -213,6 +213,7 @@ async function loadTrafficData() {
         console.log(
             "TRAFFIC VALUES UPDATED"
         );
+        updateAnalytics(data);
 
     }
     catch (error) {
@@ -225,6 +226,100 @@ async function loadTrafficData() {
     }
 }
 
+// =====================================================
+// AI ANALYTICS
+// =====================================================
+
+function updateAnalytics(trafficData = null) {
+
+    // Emergency event count
+    const emergencyEvents =
+        Array.isArray(emergencyHistory)
+            ? emergencyHistory.length
+            : 0;
+
+    setText(
+        "analyticsEmergencyEvents",
+        emergencyEvents
+    );
+
+
+    // Green corridor count
+    let greenCorridors = 0;
+
+    if (Array.isArray(emergencyHistory)) {
+
+        greenCorridors =
+            emergencyHistory.filter(function (event) {
+
+                return event.green_corridor === true;
+
+            }).length;
+    }
+
+    setText(
+        "analyticsGreenCorridors",
+        greenCorridors
+    );
+
+
+    // Average ETA
+    let totalEta = 0;
+    let etaCount = 0;
+
+    if (Array.isArray(emergencyHistory)) {
+
+        emergencyHistory.forEach(function (event) {
+
+            if (!event.eta) {
+                return;
+            }
+
+            const etaValue =
+                parseFloat(
+                    String(event.eta)
+                );
+
+            if (Number.isFinite(etaValue)) {
+
+                totalEta += etaValue;
+                etaCount++;
+            }
+        });
+    }
+
+    if (etaCount > 0) {
+
+        const averageEta =
+            totalEta / etaCount;
+
+        setText(
+            "analyticsAverageEta",
+            averageEta.toFixed(1) + " min"
+        );
+
+    } else {
+
+        setText(
+            "analyticsAverageEta",
+            "-- min"
+        );
+    }
+
+
+    // Current traffic congestion
+    if (
+        trafficData &&
+        trafficData.live &&
+        trafficData.live.density
+    ) {
+
+        setText(
+            "analyticsCongestion",
+            trafficData.live.density
+        );
+    }
+}
 
 function displayEmergencyData(data) {
 
@@ -626,6 +721,7 @@ lastValidEmergencyTime = Date.now();
 
 localStorage.setItem("lastEmergencyData", JSON.stringify(data));
 recordEmergencyEvent(data);
+updateAnalytics(data);
 
 
             // =================================================
@@ -1016,7 +1112,6 @@ function updateSignal(id, state) {
 // =====================================================
 // ROUTE VISUAL
 // =====================================================
-
 function updateRouteVisual(signals) {
 
     if (!signals) {
@@ -1265,6 +1360,8 @@ console.log(
 loadTrafficData();
 
 renderEmergencyHistory();
+updateAnalytics();
+
 
 if (lastValidEmergencyData) {
     displayEmergencyData(lastValidEmergencyData);
