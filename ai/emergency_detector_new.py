@@ -413,8 +413,14 @@ def process_frame(frame):
             "next_junction": next_junction,
             "track_id": emergency_track_id,
             "center_x": round(center_x, 1),
-            "center_y": round(center_y, 1),
-            "movement": movement,
+"center_y": round(center_y, 1),
+"box": [
+    int(best_x1),
+    int(best_y1),
+    int(best_x2),
+    int(best_y2)
+],
+"movement": movement,
             "tracking": True,
             "track_points": emergency_track_history.copy()
         }
@@ -837,8 +843,36 @@ def generate_video():
 
         if detection["detected"]:
 
-            emergency_text = (
+            # Draw emergency vehicle bounding box
+            box = detection.get("box")
 
+            if box:
+                x1, y1, x2, y2 = box
+
+                cv2.rectangle(
+                    frame,
+                    (x1, y1),
+                    (x2, y2),
+                    (0, 0, 255),
+                    3
+                )
+
+                label = (
+                    f'{detection.get("vehicle", "Emergency")} '
+                    f'{detection.get("confidence", 0):.1f}%'
+                )
+
+                cv2.putText(
+                    frame,
+                    label,
+                    (x1, max(y1 - 10, 25)),
+                    cv2.FONT_HERSHEY_SIMPLEX,
+                    0.7,
+                    (0, 0, 255),
+                    2
+                )
+
+            emergency_text = (
                 f'EMERGENCY: '
                 f'{detection["vehicle"]} | '
                 f'Confidence: '
@@ -847,16 +881,12 @@ def generate_video():
                 f'{detection["zone"]} | '
                 f'Next: '
                 f'{detection.get("next_junction", "None")}'
-
             )
-
 
         else:
 
             emergency_text = (
-
                 "EMERGENCY: Searching..."
-
             )
 
 
