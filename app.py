@@ -7,6 +7,7 @@ from flask import Flask, Response, jsonify, render_template
 from traffic.signal_timing import SignalTimingEngine
 from traffic.traffic_engine import TrafficEngine
 from camera_registry import find_nearby_cameras
+from camera_feed_finder import find_public_feeds
 
 app = Flask(__name__)
 
@@ -191,6 +192,15 @@ def nearby_cameras():
         longitude,
         radius_meters=500
     )
+
+    feeds = find_public_feeds(cameras)
+
+    for camera, feed in zip(cameras, feeds):
+
+        camera["feed_url"] = feed.get("feed_url")
+        camera["feed_type"] = feed.get("feed_type")
+        camera["feed_source"] = feed.get("source_name")
+        camera["feed_verified"] = feed.get("verified")
 
     return jsonify({
         "success": True,
