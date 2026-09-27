@@ -830,31 +830,59 @@ fetch(
                 "camera-card";
 
             cameraCard.innerHTML =
-                "<strong>📹 Camera " +
-                (index + 1) +
-                "</strong><br>" +
+    "<strong>📹 Camera " +
+    (index + 1) +
+    "</strong><br>" +
 
-                "📏 Distance: " +
-                camera.distance_meters.toFixed(1) +
-                " m<br>" +
+    "📏 Distance: " +
+    camera.distance_meters.toFixed(1) +
+    " m<br>" +
 
-                "📍 Coordinates: " +
-                camera.latitude +
-                ", " +
-                camera.longitude +
-                "<br>" +
+    "📍 Coordinates: " +
+    camera.latitude +
+    ", " +
+    camera.longitude +
+    "<br>" +
 
-                "🎥 Type: " +
-                camera.camera_type +
-                "<br>" +
+    "🎥 Type: " +
+    camera.camera_type +
+    "<br>" +
 
-                "🧭 Direction: " +
-                camera.camera_direction +
-                "°";
+    "🧭 Direction: " +
+    (
+        camera.camera_direction !== null
+            ? camera.camera_direction + "°"
+            : "Unknown"
+    ) +
+    "<br><br>" +
 
-            cameraList.appendChild(
-                cameraCard
-            );
+    "<strong>📡 Public Feed Status</strong><br>" +
+
+    (
+        camera.feed_verified
+            ? "🟢 Public source verified"
+            : "🔴 No verified public feed"
+    ) +
+    "<br>" +
+
+    "🎞️ Feed type: " +
+    (
+        camera.feed_type || "unavailable"
+    ) +
+    "<br>" +
+
+    "🌐 Source: " +
+    (
+        camera.feed_source ||
+        "No verified public feed"
+    ) +
+    "<br>" +
+
+    (
+        camera.feed_verified
+            ? "🤖 AI feed status: Source identified"
+            : "🤖 AI feed status: Not ready"
+    );
 
         }
     );
