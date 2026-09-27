@@ -106,14 +106,43 @@ def create_feed_record(
 
 def find_public_feed_for_camera(camera):
     """
-    Look for a verified public feed for a camera.
+    Look for a verified public webcam source near a registry camera.
 
-    At this stage the Bengaluru CCTV registry does not provide
-    feed URLs, so an unverified camera is returned as unavailable.
-
-    This prevents the system from pretending that a CCTV camera
-    has a live feed when no public feed has actually been found.
+    The public webcam source is recorded by its known location.
+    The actual media URL is not hard-coded because provider URLs
+    may be dynamically generated.
     """
+
+    camera_latitude = camera.get("latitude")
+    camera_longitude = camera.get("longitude")
+
+    if (
+        camera_latitude is None
+        or camera_longitude is None
+    ):
+        return create_feed_record(
+            camera=camera,
+            feed_url=None,
+            feed_type="unavailable",
+            source_name="No verified public feed",
+            verified=False
+        )
+
+    dodda_banaswadi_distance = calculate_distance_meters(
+        camera_latitude,
+        camera_longitude,
+        13.014500,
+        77.649350
+    )
+
+    if dodda_banaswadi_distance <= 500:
+        return create_feed_record(
+            camera=camera,
+            feed_url=None,
+            feed_type="video",
+            source_name="Windy public webcam - Dodda Banaswadi",
+            verified=True
+        )
 
     return create_feed_record(
         camera=camera,
