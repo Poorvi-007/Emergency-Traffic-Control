@@ -639,6 +639,52 @@
     >
         🚦 Start AI Traffic Analysis
     </button>
+    <!-- ========================= -->
+<!-- NAVIGATION & ROUTE INFO -->
+<!-- ========================= -->
+
+<section class="navigation-panel">
+
+    <h3>🧭 Navigation to Monitoring Location</h3>
+
+    <button
+        type="button"
+        id="useMyLocation"
+        class="analysis-button"
+    >
+        📍 Use My Current Location
+    </button>
+
+    <div class="route-summary">
+
+        <p>
+            <strong>📍 Destination:</strong>
+            <span id="routeDestination">Not selected</span>
+        </p>
+
+        <p>
+            <strong>📏 Road Distance:</strong>
+            <span id="routeDistance">--</span>
+        </p>
+
+        <p>
+            <strong>⏱️ Estimated Travel Time:</strong>
+            <span id="routeETA">--</span>
+        </p>
+
+    </div>
+
+    <div class="route-directions">
+
+        <h4>🛣️ Directions</h4>
+
+        <ol id="routeSteps">
+            <li>Select a location and use your current location to get directions.</li>
+        </ol>
+
+    </div>
+
+</section>
 
 </section>
 </main>
@@ -689,6 +735,13 @@ document.addEventListener("DOMContentLoaded", function () {
     ).addTo(map);
 
     let selectedMarker = null;
+let monitoringCircle = null;
+
+// Navigation variables
+let userLocationMarker = null;
+let routeLine = null;
+let userLatitude = null;
+let userLongitude = null;
 
     map.on("click", function (event) {
 
@@ -756,10 +809,463 @@ fetch(
         "Location name lookup failed:",
         error
     );
-
 });
 
-    });
+    // Calculate route if current location
+// has already been obtained
+
+if (
+    userLatitude !== null &&
+    userLongitude !== null
+) {
+
+    getRouteToSelectedLocation();
+
+}
+
+}); 
+// ============================================
+// GET ROAD ROUTE
+// ============================================
+
+function getRouteToSelectedLocation() {
+
+    if (
+        userLatitude === null ||
+        userLongitude === null
+    ) {
+
+        alert(
+            "Please click 'Use My Current Location' first."
+        );
+
+        return;
+    }
+
+    if (!selectedMarker) {
+
+        alert(
+            "Please select a monitoring location on the map first."
+        );
+
+        return;
+    }
+
+    const destination = selectedMarker.getLatLng();
+
+    const start =
+        userLongitude +
+        "," +
+        userLatitude;
+
+    const end =
+        destination.lng +
+        "," +
+        destination.lat;
+
+    const routeURL =
+        "https://router.project-osrm.org/route/v1/driving/" +
+        start +
+        ";" +
+        end +
+        "?overview=full&geometries=geojson&steps=true";
+
+    document.getElementById("routeDistance").textContent =
+        "Calculating...";
+
+    document.getElementById("routeETA").textContent =
+        "Calculating...";
+
+    fetch(routeURL)
+
+        .then(response => response.json())
+
+        .then(data => {
+
+            if (
+                data.code !== "Ok" ||
+                !data.routes ||
+                data.routes.length === 0
+            ) {
+
+                throw new Error(
+                    "No route found."
+                );
+
+            }
+
+            const route = data.routes[0];
+
+            // =================================
+            // DISTANCE
+            // =================================
+
+            const distanceKm =
+                route.distance / 1000;
+
+            document.getElementById(
+                "routeDistance"
+            ).textContent =
+                distanceKm.toFixed(2) +
+                " km";
+
+            // =================================
+            // ETA
+            // =================================
+
+            const totalMinutes =
+                Math.round(
+                    route.duration / 60
+                );
+
+            let etaText;
+
+            if (totalMinutes < 60) {
+
+                etaText =
+                    totalMinutes +
+                    " min";
+
+            } else {
+
+                const hours =
+                    Math.floor(
+                        totalMinutes / 60
+                    );
+
+                const minutes =
+                    totalMinutes % 60;
+
+                etaText =
+                    hours +
+                    " hr " +
+                    minutes +
+                    " min";
+            }
+
+            document.getElementById(
+                "routeETA"
+            ).textContent =
+                etaText;
+
+            // =================================
+            // DRAW ROUTE
+            // =================================
+
+            if (routeLine) {
+
+                map.removeLayer(
+                    routeLine
+                );
+
+            }
+
+            const routeCoordinates =
+                route.geometry.coordinates.map(
+                    coordinate => [
+                        coordinate[1],
+                        coordinate[0]
+                    ]
+                );
+
+            routeLine =
+                L.polyline(
+                    routeCoordinates,
+                    {
+                        weight: 6,
+                        opacity: 0.8
+                    }
+                ).addTo(map);
+
+            // =================================
+            // SHOW ENTIRE ROUTE
+            // =================================
+
+            map.fitBounds(
+                routeLine.getBounds(),
+                {
+                    padding: [30, 30]
+                }
+            );
+
+            // =================================
+            // DESTINATION
+            // =================================
+
+            document.getElementById(
+                "routeDestination"
+            ).textContent =
+                document.getElementById(
+                    "selectedLocationName"
+                ).textContent;
+
+            // =================================
+            // TURN-BY-TURN DIRECTIONS
+            // =================================
+
+            const stepsContainer =
+                document.getElementById(
+                    "routeSteps"
+                );
+
+            stepsContainer.innerHTML = "";
+
+            route.legs.forEach(
+    leg => {
+
+        leg.steps.forEach(
+            step => {
+
+                const listItem =
+                    document.createElement("li");
+
+                const stepDistance =
+                    step.distance >= 1000
+                        ? (
+                            step.distance / 1000
+                        ).toFixed(2) + " km"
+                        : Math.round(
+                            step.distance
+                        ) + " m";
+
+                let instruction = "";
+                let icon = "⬆️";
+
+                const maneuverType =
+                    step.maneuver?.type || "";
+
+                const modifier =
+                    step.maneuver?.modifier || "";
+
+                if (maneuverType === "arrive") {
+
+                    icon = "🏁";
+                    instruction =
+                        "Arrive at your destination";
+
+                }
+                else if (
+                    maneuverType === "uturn"
+                ) {
+
+                    icon = "🔄";
+                    instruction = "Make a U-turn";
+
+                }
+                else if (
+                    modifier === "left" ||
+                    modifier === "sharp left"
+                ) {
+
+                    icon = "↰";
+                    instruction = "Turn left";
+
+                }
+                else if (
+                    modifier === "right" ||
+                    modifier === "sharp right"
+                ) {
+
+                    icon = "↱";
+                    instruction = "Turn right";
+
+                }
+                else if (
+                    modifier === "slight left"
+                ) {
+
+                    icon = "↖️";
+                    instruction = "Keep slightly left";
+
+                }
+                else if (
+                    modifier === "slight right"
+                ) {
+
+                    icon = "↗️";
+                    instruction = "Keep slightly right";
+
+                }
+                else if (
+                    maneuverType === "roundabout" ||
+                    maneuverType === "rotary"
+                ) {
+
+                    icon = "🔄";
+                    instruction =
+                        "Enter the roundabout";
+
+                }
+                else {
+
+                    icon = "⬆️";
+                    instruction =
+                        "Continue straight";
+
+                }
+
+                let roadName =
+                    step.name;
+
+                if (
+                    !roadName ||
+                    roadName.trim() === ""
+                ) {
+                    roadName = "";
+                }
+
+                listItem.textContent =
+                    icon +
+                    " " +
+                    instruction +
+                    (
+                        roadName
+                            ? " onto " + roadName
+                            : ""
+                    ) +
+                    " — " +
+                    stepDistance;
+
+                stepsContainer.appendChild(
+                    listItem
+                );
+
+            }
+        );
+
+    }
+);
+
+                       
+
+        })
+
+        .catch(error => {
+
+            console.error(
+                "Route calculation failed:",
+                error
+            );
+
+            document.getElementById(
+                "routeDistance"
+            ).textContent =
+                "Route unavailable";
+
+            document.getElementById(
+                "routeETA"
+            ).textContent =
+                "--";
+
+            alert(
+                "Unable to calculate the road route. Please try again."
+            );
+        
+        });
+
+}
+
+
+
+
+// ============================================
+// GET USER'S CURRENT LOCATION
+// ============================================
+
+document.getElementById(
+    "useMyLocation"
+).addEventListener(
+    "click",
+    function () {
+
+        if (!navigator.geolocation) {
+
+            alert(
+                "Your browser does not support location services."
+            );
+
+            return;
+        }
+
+        navigator.geolocation.getCurrentPosition(
+
+            function (position) {
+
+                userLatitude =
+                    position.coords.latitude;
+
+                userLongitude =
+                    position.coords.longitude;
+
+                // Remove previous location marker
+
+                if (userLocationMarker) {
+
+                    map.removeLayer(
+                        userLocationMarker
+                    );
+
+                }
+
+                // Add current location marker
+
+                userLocationMarker =
+                    L.marker([
+                        userLatitude,
+                        userLongitude
+                    ])
+                    .addTo(map);
+
+                userLocationMarker
+                    .bindPopup(
+                        "📍 Your Current Location"
+                    )
+                    .openPopup();
+
+                // Move map toward current location
+
+                map.setView(
+                    [
+                        userLatitude,
+                        userLongitude
+                    ],
+                    14
+                );
+
+                // Automatically calculate route
+                // if destination was already selected
+
+                if (selectedMarker) {
+
+                    getRouteToSelectedLocation();
+
+                }
+
+            },
+
+            function (error) {
+
+                console.error(
+                    "Location error:",
+                    error
+                );
+
+                alert(
+                    "Location permission was not granted. Please allow location access in your browser."
+                );
+
+            },
+
+            {
+                enableHighAccuracy: true,
+                timeout: 10000,
+                maximumAge: 0
+            }
+
+        );
+
+    }
+);
 
 });
 
