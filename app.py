@@ -6,6 +6,7 @@ from ai.route_engine import RouteEngine
 from flask import Flask, Response, jsonify, render_template
 from traffic.signal_timing import SignalTimingEngine
 from traffic.traffic_engine import TrafficEngine
+from camera_registry import find_nearby_cameras
 
 app = Flask(__name__)
 
@@ -171,6 +172,34 @@ def emergency():
         "ai_explanation": decision_result["explanation"]
     })
 
+@app.route("/nearby_cameras")
+def nearby_cameras():
+
+    from flask import request
+
+    try:
+        latitude = float(request.args.get("lat"))
+        longitude = float(request.args.get("lon"))
+    except (TypeError, ValueError):
+        return jsonify({
+            "success": False,
+            "error": "Valid latitude and longitude are required."
+        }), 400
+
+    cameras = find_nearby_cameras(
+        latitude,
+        longitude,
+        radius_meters=500
+    )
+
+    return jsonify({
+        "success": True,
+        "latitude": latitude,
+        "longitude": longitude,
+        "radius_meters": 500,
+        "camera_count": len(cameras),
+        "cameras": cameras
+    })
 
 # -----------------------------
 # AI Video Feed

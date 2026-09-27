@@ -613,6 +613,23 @@
         </p>
 
     </div>
+    <div class="nearby-cameras-panel">
+
+    <h3>📹 Nearby Public Traffic Cameras</h3>
+
+    <p id="cameraSearchStatus">
+        Select a location on the map to search for cameras.
+    </p>
+
+    <div id="cameraCount">
+        Cameras found: 0
+    </div>
+
+    <div id="cameraList">
+        <p>No cameras searched yet.</p>
+    </div>
+
+</div>
 
 
     <div class="video-upload">
@@ -747,6 +764,115 @@ let userLongitude = null;
 
         const latitude = event.latlng.lat;
         const longitude = event.latlng.lng;
+            // Automatically find public cameras within 500 meters
+    // Automatically find public cameras within 500 meters
+fetch(
+    "/nearby_cameras?lat=" +
+    latitude +
+    "&lon=" +
+    longitude
+)
+.then(response => response.json())
+.then(data => {
+
+    console.log(
+        "Nearby cameras found:",
+        data.camera_count
+    );
+
+    const cameraSearchStatus =
+        document.getElementById("cameraSearchStatus");
+
+    const cameraCount =
+        document.getElementById("cameraCount");
+
+    const cameraList =
+        document.getElementById("cameraList");
+
+    if (!data.success) {
+
+        cameraSearchStatus.textContent =
+            "Camera search failed.";
+
+        cameraCount.textContent =
+            "Cameras found: 0";
+
+        cameraList.innerHTML =
+            "<p>Unable to search for cameras.</p>";
+
+        return;
+    }
+
+    cameraSearchStatus.textContent =
+        "Public camera registry searched within 500 meters.";
+
+    cameraCount.textContent =
+        "Cameras found: " +
+        data.camera_count;
+
+    cameraList.innerHTML = "";
+
+    if (data.camera_count === 0) {
+
+        cameraList.innerHTML =
+            "<p>❌ No registered cameras found within 500 meters.</p>";
+
+        return;
+    }
+
+    data.cameras.forEach(
+        function(camera, index) {
+
+            const cameraCard =
+                document.createElement("div");
+
+            cameraCard.className =
+                "camera-card";
+
+            cameraCard.innerHTML =
+                "<strong>📹 Camera " +
+                (index + 1) +
+                "</strong><br>" +
+
+                "📏 Distance: " +
+                camera.distance_meters.toFixed(1) +
+                " m<br>" +
+
+                "📍 Coordinates: " +
+                camera.latitude +
+                ", " +
+                camera.longitude +
+                "<br>" +
+
+                "🎥 Type: " +
+                camera.camera_type +
+                "<br>" +
+
+                "🧭 Direction: " +
+                camera.camera_direction +
+                "°";
+
+            cameraList.appendChild(
+                cameraCard
+            );
+
+        }
+    );
+
+})
+.catch(error => {
+
+    console.error(
+        "Camera search failed:",
+        error
+    );
+
+    document.getElementById(
+        "cameraSearchStatus"
+    ).textContent =
+        "Camera search failed.";
+
+});
 
         if (selectedMarker) {
             map.removeLayer(selectedMarker);
